@@ -9,17 +9,20 @@ import { MODULES } from "../src/constants/modules.js";
         ConfigModule.forRoot({ isGlobal: true, cache: true, envFilePath: ".env.test" }),
         TypeOrmModule.forRootAsync({
             useFactory: async () => {
-                const url = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
+                const url = process.env.TEST_DATABASE_URL;
                 if (!url) {
-                    throw new Error("Missing TEST_DATABASE_URL (or DATABASE_URL) for tests");
+                    throw new Error("Missing TEST_DATABASE_URL for tests");
                 }
 
                 return {
                     type: "postgres",
                     url,
                     autoLoadEntities: true,
+                    // Tests must generate schema from entities (no migrations).
                     synchronize: true,
                     dropSchema: true,
+                    migrationsRun: false,
+                    migrations: [],
                     retryAttempts: 1,
                     retryDelay: 0,
                 };
