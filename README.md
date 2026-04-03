@@ -29,6 +29,7 @@ Then open:
 Notes:
 - Backend runs `npm run migration:run` on container start before starting the dev server.
 - Postgres data is persisted in a Docker volume.
+- Dependency changes: if you edit `backend/package.json` or `frontend/package.json`, rebuild images (`docker compose build`) so containers pick up the new dependencies.
 
 ## Local dev (without Docker)
 
@@ -90,4 +91,3 @@ npm test
 - Add frontend detail page (`/incidents/:id`) and deep linking.
 - Improve real-time list consistency for non-first pages (smarter page-aware inserts/removals).
 - Add seed command for demo data.
-
