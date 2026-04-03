@@ -45,7 +45,7 @@ export function IncidentFilters({ filters, onChange }: Props) {
 
             <Input
                 className="w-48"
-                placeholder="Filter by service…"
+                placeholder="Search (service/title/description)…"
                 value={filters.service ?? ""}
                 onChange={e => onChange({ ...filters, service: e.target.value || undefined, page: 1 })}
             />

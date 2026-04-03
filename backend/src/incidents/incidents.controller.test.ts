@@ -130,6 +130,32 @@ describe("IncidentsController", () => {
         });
     });
 
+    it("GET /incidents supports full-text search via service query param", async () => {
+        await request(app.getHttpServer())
+            .post("/incidents")
+            .send({
+                title: "Database timeout on payment service",
+                description: "Users are receiving timeout errors during checkout.",
+                service: "Payment API",
+                severity: "high",
+            })
+            .expect(201);
+
+        await request(app.getHttpServer())
+            .post("/incidents")
+            .send({
+                title: "Auth latency",
+                description: "Some users are reporting slow logins",
+                service: "Auth Service",
+                severity: "low",
+            })
+            .expect(201);
+
+        const res = await request(app.getHttpServer()).get("/incidents?service=payment").expect(200);
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.data[0]).toMatchObject({ service: "Payment API" });
+    });
+
     it("GET /incidents returns 400 for invalid pagination params", async () => {
         const res = await request(app.getHttpServer()).get("/incidents?page=0&limit=999").expect(400);
         expect(res.body).toHaveProperty("error.code", "VALIDATION_ERROR");

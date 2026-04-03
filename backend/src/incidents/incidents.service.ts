@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindOptionsWhere, Repository } from "typeorm";
+import { Repository } from "typeorm";
 
 import { EventsGateway } from "../events/events.gateway.js";
 import { CreateIncidentDto } from "./dto/create-incident.dto.js";
@@ -25,17 +25,30 @@ export class IncidentsService {
 
     async findAll(query: ListIncidentsDto) {
         const { page = 1, limit = 10, status, severity, service } = query;
-        const where: FindOptionsWhere<Incident> = {};
-        if (status) where.status = status;
-        if (severity) where.severity = severity;
-        if (service) where.service = service;
 
-        const [data, totalItems] = await this.incidentRepository.findAndCount({
-            where,
-            order: { createdAt: "DESC" },
-            skip: (page - 1) * limit,
-            take: limit,
-        });
+        const qb = this.incidentRepository.createQueryBuilder("incident");
+
+        if (status) qb.andWhere("incident.status = :status", { status });
+        if (severity) qb.andWhere("incident.severity = :severity", { severity });
+        if (service?.trim()) {
+            qb.andWhere(
+                `
+                to_tsvector(
+                    'simple',
+                    coalesce(incident.title, '') || ' ' ||
+                    coalesce(incident.description, '') || ' ' ||
+                    coalesce(incident.service, '')
+                ) @@ websearch_to_tsquery('simple', :service)
+                `,
+                { service: service.trim() },
+            );
+        }
+
+        qb.orderBy("incident.createdAt", "DESC")
+            .skip((page - 1) * limit)
+            .take(limit);
+
+        const [data, totalItems] = await qb.getManyAndCount();
 
         return {
             data,

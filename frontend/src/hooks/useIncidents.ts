@@ -27,7 +27,11 @@ type Action =
 function matchesFilters(incident: Incident, params: ListIncidentsParams): boolean {
     if (params.status && incident.status !== params.status) return false;
     if (params.severity && incident.severity !== params.severity) return false;
-    if (params.service && incident.service !== params.service) return false;
+    if (params.service?.trim()) {
+        const needle = params.service.trim().toLowerCase();
+        const haystack = `${incident.service} ${incident.title} ${incident.description}`.toLowerCase();
+        if (!haystack.includes(needle)) return false;
+    }
     return true;
 }
 
