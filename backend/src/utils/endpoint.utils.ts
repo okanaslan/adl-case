@@ -1,8 +1,6 @@
-import { Get, Post, Put, Delete, UsePipes, applyDecorators, Patch } from "@nestjs/common";
-import { ValidationPipe } from "@nestjs/common";
+import { Delete, Get, Patch, Post, Put, UsePipes, ValidationPipe, applyDecorators } from "@nestjs/common";
 
 interface EndpointConfig {
-    isPublic?: boolean;
     method: "get" | "post" | "put" | "patch" | "delete";
     path: string;
     skipValidation?: boolean;
@@ -18,8 +16,9 @@ export function defineEndpoint({ skipValidation = false, ...config }: EndpointCo
     const decorators: Array<ClassDecorator | MethodDecorator | PropertyDecorator> = [];
 
     if (!skipValidation) {
-        decorators.push(UsePipes(new ValidationPipe()));
+        decorators.push(UsePipes(new ValidationPipe({ transform: true, whitelist: true })));
     }
+
     const methodDecorator = {
         get: Get,
         post: Post,
@@ -27,6 +26,7 @@ export function defineEndpoint({ skipValidation = false, ...config }: EndpointCo
         put: Put,
         delete: Delete,
     }[config.method];
+
     if (methodDecorator) {
         decorators.push(methodDecorator(config.path));
     }
