@@ -12,9 +12,11 @@ interface Props {
     onDeleted: () => void;
     onUpdated: () => void;
     isNew?: boolean;
+    isUpdated?: boolean;
+    isExiting?: boolean;
 }
 
-export function IncidentRow({ incident, onDeleted, onUpdated, isNew }: Props) {
+export function IncidentRow({ incident, onDeleted, onUpdated, isNew, isUpdated, isExiting }: Props) {
     const [updateOpen, setUpdateOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
@@ -41,7 +43,13 @@ export function IncidentRow({ incident, onDeleted, onUpdated, isNew }: Props) {
     return (
         <>
             <tr
-                className={`border-b border-border transition-colors hover:bg-muted/30 ${isNew ? "animate-in fade-in slide-in-from-top-2 duration-300" : ""}`}
+                className={`border-b border-border transition-colors hover:bg-muted/30 ${
+                    isNew ? "animate-in fade-in slide-in-from-top-2 duration-300" : ""
+                } ${
+                    isUpdated ? "bg-muted/20" : ""
+                } ${
+                    isExiting ? "animate-out fade-out duration-200" : ""
+                }`}
             >
                 <td className="px-4 py-3">
                     <div className="font-medium text-foreground leading-snug">{incident.title}</div>

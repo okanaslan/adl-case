@@ -7,6 +7,9 @@ RUN npm ci
 
 COPY . .
 
-EXPOSE 3000
-CMD ["npm", "run", "start:dev"]
+COPY docker-entrypoint.sh /usr/local/bin/backend-entrypoint.sh
+RUN chmod +x /usr/local/bin/backend-entrypoint.sh
 
+EXPOSE 3000
+ENTRYPOINT ["/usr/local/bin/backend-entrypoint.sh"]
+CMD ["npm", "run", "start:dev"]

@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Query } from "@nestjs/common";
+import { Body, Controller, Param, ParseUUIDPipe, Query } from "@nestjs/common";
 
 import { createIncidentEndpoint } from "./definitions/create-incident.definition.js";
 import { deleteIncidentEndpoint } from "./definitions/delete-incident.definition.js";
@@ -25,17 +25,17 @@ export class IncidentsController {
     }
 
     @getIncidentEndpoint
-    findOne(@Param("id") id: string) {
+    findOne(@Param("id", new ParseUUIDPipe()) id: string) {
         return this.incidentsService.findOne(id);
     }
 
     @updateIncidentEndpoint
-    update(@Param("id") id: string, @Body() dto: UpdateIncidentDto) {
+    update(@Param("id", new ParseUUIDPipe()) id: string, @Body() dto: UpdateIncidentDto) {
         return this.incidentsService.update(id, dto);
     }
 
     @deleteIncidentEndpoint
-    remove(@Param("id") id: string) {
+    remove(@Param("id", new ParseUUIDPipe()) id: string) {
         return this.incidentsService.remove(id);
     }
 }

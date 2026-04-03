@@ -21,12 +21,26 @@ export class AllExceptionsFilter implements ExceptionFilter {
             const status = exception.getStatus();
             const exceptionResponse = exception.getResponse();
 
+            if (
+                typeof exceptionResponse === "object" &&
+                exceptionResponse !== null &&
+                "error" in exceptionResponse &&
+                typeof (exceptionResponse as { error?: unknown }).error === "object" &&
+                (exceptionResponse as { error?: { code?: unknown } }).error !== null &&
+                "code" in (exceptionResponse as { error: { code: unknown } }).error
+            ) {
+                return response.status(status).json(exceptionResponse);
+            }
+
             if (typeof exceptionResponse === "object" && "message" in exceptionResponse && Array.isArray(exceptionResponse.message)) {
                 return response.status(status).json({
                     error: {
                         code: "VALIDATION_ERROR",
                         message: "Invalid payload",
-                        details: exceptionResponse.message.map((reason: string) => ({ reason })),
+                        details: exceptionResponse.message.map((reason: string) => {
+                            const [field] = reason.split(" ");
+                            return { field, reason };
+                        }),
                     },
                 });
             }

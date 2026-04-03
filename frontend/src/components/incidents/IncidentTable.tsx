@@ -10,9 +10,8 @@ const LIMIT = 10;
 
 export function IncidentTable() {
     const [filters, setFilters] = useState<ListIncidentsParams>({ page: 1, limit: LIMIT });
-    const [newIds, setNewIds] = useState<Set<string>>(new Set());
 
-    const { data, meta, loading, error, refetch } = useIncidents(filters);
+    const { data, meta, loading, error, refetch, newIds, updatedIds, exitingIds } = useIncidents(filters);
 
     function handleCreated() {
         // New item will arrive via socket event as "new"
@@ -26,15 +25,6 @@ export function IncidentTable() {
     function handlePage(page: number) {
         setFilters(f => ({ ...f, page }));
     }
-
-    // Track newly created incidents for entry animation
-    function handleSocketCreated(id: string) {
-        setNewIds(s => new Set(s).add(id));
-        setTimeout(() => setNewIds(s => { const n = new Set(s); n.delete(id); return n; }), 1000);
-    }
-
-    // Suppress unused warning — socket events drive this via useIncidents
-    void handleSocketCreated;
 
     if (error) {
         return (
@@ -82,6 +72,8 @@ export function IncidentTable() {
                                     key={incident.id}
                                     incident={incident}
                                     isNew={newIds.has(incident.id)}
+                                    isUpdated={updatedIds.has(incident.id)}
+                                    isExiting={exitingIds.has(incident.id)}
                                     onDeleted={refetch}
                                     onUpdated={refetch}
                                 />

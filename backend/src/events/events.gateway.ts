@@ -4,7 +4,13 @@ import { Server } from "socket.io";
 
 import { Incident } from "../incidents/entities/incident.entity.js";
 
-@WebSocketGateway({ cors: { origin: "*" } })
+const corsOrigin = process.env.CORS_ORIGIN;
+@WebSocketGateway({
+    cors: {
+        origin: corsOrigin?.trim() ? corsOrigin.split(",").map(origin => origin.trim()) : "*",
+        credentials: Boolean(corsOrigin?.trim()),
+    },
+})
 export class EventsGateway implements OnGatewayInit {
     @WebSocketServer()
     private server: Server;
